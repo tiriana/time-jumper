@@ -26,16 +26,20 @@ toggle_time_sync() {
     sudo systemsetup -setusingnetworktime $1
 }
 
+# Get current time and format
 CURRENT_TIME=$(date +"%Y-%m-%d %H:%M:%S")
+DATE_FORMAT=$(date +"%x %X")  # This will get system date/time format
+echo "Current time format: $DATE_FORMAT"
 
 $SYNC && toggle_time_sync off
 
-# Change time by adding minutes
-NEW_TIME=$(date -v +"$MINUTES"M +"%Y-%m-%d %H:%M:%S")
-sudo date -f "%Y-%m-%d %H:%M:%S" "$NEW_TIME"
+# Calculate new time by adding minutes
+NEW_TIME=$(date -v +"$MINUTES"M +"$DATE_FORMAT")
+echo "Changing system time by $MINUTES minutes to: $NEW_TIME"
+
+# Apply the new time
+sudo date -f "$DATE_FORMAT" "$NEW_TIME"
+
 sleep 1
 
-# Revert time back
-sudo date -f "%Y-%m-%d %H:%M:%S" "$CURRENT_TIME"
-
-$SYNC && toggle_time_sync on
+# Revert to the original time using system's format
