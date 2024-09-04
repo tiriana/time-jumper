@@ -1,65 +1,44 @@
 @echo off
-setlocal
 
-set SYNC=false
-set MINUTES=
+REM Check for help argument
+if "%1"=="--help" (
+    echo Usage: cmd.bat [-s] <minutes>
+    echo   -s: Optional flag to disable and re-enable auto time sync
+    echo   <minutes>: Number of minutes to jump
+    exit /b 0
+)
 
-rem Parse arguments
-:parse_args
-if "%1"=="--help" goto :usage
-if "%1"=="-s" set SYNC=true && shift && goto :parse_args
-if "%1"=="" goto :done_parse
-if not defined MINUTES set MINUTES=%1 && shift && goto :done_parse
-goto :usage
-
-:usage
-echo Usage: %0 [-s] <minutes>
-echo    --help: Show help
-echo    -s    : Disable and re-enable time synchronization
-echo    <minutes>: Number of minutes to change the system time
-exit /b 0
-
-:done_parse
-if not defined MINUTES goto :usage
-
-rem Check for admin privileges
-net session >nul 2>&1
-if %errorLevel% NEQ 0 (
-    echo Error: This script requires administrator privileges.
+REM Check if the number of arguments is correct
+if "%1"=="" (
+    echo Error: No time provided.
     exit /b 1
 )
 
-rem Disable time sync if requested
+REM Check if first argument is numeric (minutes)
+set /A MINUTES=%1 2>NUL
+if "%MINUTES%"=="" (
+    echo Error: Invalid time format.
+    exit /b 1
+)
+
+REM Check for -s flag
+set SYNC=false
+if "%2"=="-s" (
+    set SYNC=true
+)
+
+REM Disable time sync if -s flag is set
 if "%SYNC%"=="true" (
-    w32tm /config /manualpeerlist:127.0.0.1 /syncfromflags:manual /reliable:YES /update
-    net stop w32time
-    echo Time sync disabled.
+    w32tm /config /manualpeerlist:"",0x8 /syncfromflags:manual /reliable:NO /update
+    w32tm /config /syncfromflags:manual /update
 )
 
-rem Get current time
-for /f "tokens=1-4 delims=:." %%a in ("%time%") do (
-    set /a hh=%%a, mm=%%b, ss=%%c
-)
+REM Jump time by minutes
+powershell -Command "Set-Date (Get-Date).AddMinutes(%MINUTES%)"
 
-rem Add minutes
-set /a new_mm=mm + MINUTES
-if %new_mm% geq 60 (
-    set /a hh+=new_mm/60, new_mm=new_mm%%60
-)
-
-rem Set new time
-time %hh%:%new_mm%
-
-rem Wait 1 second and set back original time
-timeout /t 1 >nul
-time %time%
-
-rem Re-enable time sync if needed
+REM Re-enable time sync if -s flag is set
 if "%SYNC%"=="true" (
-    net start w32time
     w32tm /resync
-    echo Time sync re-enabled.
 )
 
-endlocal
 exit /b 0
