@@ -34,11 +34,20 @@ $SYNC && toggle_time_sync off
 NEW_TIME=$(date -v +"$MINUTES"M +"%Y-%m-%d %H:%M:%S")
 echo "Changing system time by $MINUTES minutes to: $NEW_TIME"
 
-sudo date $(date -v +"$MINUTES"M +"%m%d%H%M%Y") || true
+sudo date $(date -v +"$MINUTES"M +"%m%d%H%M%Y")
+date_exit_code=$?
 
 sleep 1
 
 echo "Reverting system time to original: $CURRENT_TIME"
-sudo date $(date -j -f "%Y-%m-%d %H:%M:%S" "$CURRENT_TIME" +"%m%d%H%M%Y") || true
+sudo date $(date -j -f "%Y-%m-%d %H:%M:%S" "$CURRENT_TIME" +"%m%d%H%M%Y")
+revert_exit_code=$?
 
 $SYNC && toggle_time_sync on
+
+if [[ $date_exit_code -ne 0 || $revert_exit_code -ne 0 ]]; then
+    echo "Warning: The date command returned an error, but the operation may have succeeded."
+    exit 0
+else
+    exit 0
+fi
