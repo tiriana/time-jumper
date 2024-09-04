@@ -16,6 +16,7 @@
     "sudo-prompt": "^9.2.1"
   },
   "dependencies": {
+    "commander": "^12.1.0",
     "electron-sudo": "^4.0.12"
   }
 }
