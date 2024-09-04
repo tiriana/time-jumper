@@ -5,6 +5,7 @@ set SYNC=false
 set MINUTES=
 
 :parse_args
+if "%1"=="--help" goto :usage
 if "%1"=="-s" set SYNC=true && shift && goto :parse_args
 if "%1"=="" goto :done_parse
 if not defined MINUTES set MINUTES=%1 && shift && goto :done_parse
@@ -12,15 +13,26 @@ goto :usage
 
 :usage
 echo Usage: %0 [-s] <minutes>
+echo    --help: Show help
+echo    -s    : Disable and re-enable time synchronization
+echo    <minutes>: Number of minutes to change the system time
 exit /b 1
 
 :done_parse
 if not defined MINUTES goto :usage
 
+rem Check for admin privileges
+net session >nul 2>&1
+if %errorLevel% NEQ 0 (
+    echo Error: This script requires administrator privileges.
+    exit /b 1
+)
+
 rem Disable time sync if requested
 if "%SYNC%"=="true" (
     w32tm /config /manualpeerlist:127.0.0.1 /syncfromflags:manual /reliable:YES /update
     net stop w32time
+    echo Time sync disabled.
 )
 
 rem Get current time
@@ -45,6 +57,7 @@ rem Re-enable time sync if requested
 if "%SYNC%"=="true" (
     net start w32time
     w32tm /resync
+    echo Time sync re-enabled.
 )
 
 endlocal
