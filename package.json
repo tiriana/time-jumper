@@ -5,10 +5,31 @@
     "name": "Radomir Wojtera",
     "url": "https://tiriana.github.io/phantombit.io/"
   },
+  "main": "time-jumper.js",
   "version": "1.0.0",
   "description": "A time-jumping tool",
-  "main": "main.js",
   "dependencies": {
     "commander": "^12.1.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tiriana/time-jumper.git"
+  },
+  "scripts": {
+    "release": "standard-version"
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
+      "pre-commit": "npm run release"
+    }
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^13.2.1",
+    "@commitlint/config-conventional": "^13.2.0",
+    "husky": "^7.0.4",
+    "standard-version": "^9.5.0"
+  },
+  "license": "MIT",
+
 }
