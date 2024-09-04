@@ -1,10 +1,30 @@
 const { app, BrowserWindow, ipcMain } = require("electron");
-const sudo = require("sudo-prompt"); // For elevated permissions
 const path = require("path");
+const os = require("os");
 
+// Constants
+const JUMP_DURATION = 5000; // Duration of the time jump in milliseconds (5 seconds)
+
+// Import platform-specific modules
+let platformModule;
+switch (os.platform()) {
+  case "win32":
+    platformModule = require("./platform/windows");
+    break;
+  case "linux":
+    platformModule = require("./platform/linux");
+    break;
+  case "darwin":
+    platformModule = require("./platform/macos");
+    break;
+  default:
+    throw new Error("Unsupported platform");
+}
+
+// Application state
 let mainWindow;
 let autoTimeEnabled = true; // Track if auto time is enabled
-const options = { name: "Time Jumper" };
+let originalTime; // To store the original time before the jump
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -22,7 +42,7 @@ function createWindow() {
   });
 
   // Disable auto-time on startup
-  disableAutoTimeSync(() => {
+  platformModule.disableAutoTimeSync(() => {
     autoTimeEnabled = false;
     mainWindow.webContents.send("update-auto-time-status", autoTimeEnabled);
   });
@@ -32,99 +52,52 @@ app.on("ready", createWindow);
 
 // When the app is closed, re-enable auto-time
 app.on("will-quit", (event) => {
-  enableAutoTimeSync(() => {
+  platformModule.enableAutoTimeSync(() => {
     console.log("Auto time re-enabled on exit.");
   });
 });
 
+// Handle time jump request
 ipcMain.on("jump-time", (event, hours) => {
   if (!autoTimeEnabled) {
     jumpTime(hours);
   }
 });
 
+// Handle manual disabling of auto-time sync
 ipcMain.on("disable-auto-time", (event) => {
-  disableAutoTimeSync(() => {
+  platformModule.disableAutoTimeSync(() => {
     autoTimeEnabled = false;
     mainWindow.webContents.send("update-auto-time-status", autoTimeEnabled);
   });
 });
 
+// Handle manual enabling of auto-time sync
 ipcMain.on("enable-auto-time", (event) => {
-  enableAutoTimeSync(() => {
+  platformModule.enableAutoTimeSync(() => {
     autoTimeEnabled = true;
     mainWindow.webContents.send("update-auto-time-status", autoTimeEnabled);
   });
 });
 
-// Function to jump time
+// Function to get current time
+function getCurrentTime() {
+  return new Date();
+}
+
+// Function to jump time and revert back after a delay
 function jumpTime(hours) {
-  const currentTime = new Date();
-  const newTime = new Date(currentTime.getTime() + hours * 60 * 60 * 1000);
-  const newTimeString = newTime.toISOString().slice(0, 19).replace("T", " ");
+  originalTime = getCurrentTime(); // Store the original time
+  const newTime = new Date(originalTime.getTime() + hours * 60 * 60 * 1000);
 
   console.log(`Jumping time by ${hours} hour(s)`);
 
-  // Adjust system time based on platform
-  const osType = process.platform;
-  let command;
-
-  if (osType === "win32") {
-    command = `date ${newTime.toISOString().slice(0, 10)} && time ${newTime
-      .toTimeString()
-      .slice(0, 8)}`;
-  } else {
-    command = `date -s "${newTimeString}"`;
-  }
-
-  sudo.exec(command, options, (error, stdout, stderr) => {
+  // Use platform-specific jump time function
+  platformModule.jumpTime(newTime, originalTime, JUMP_DURATION, (error) => {
     if (error) {
-      console.error("Failed to set time:", stderr);
-      return;
+      console.error("Failed to jump time:", error);
+    } else {
+      console.log("Time jump and revert successful.");
     }
-    console.log("Time set successfully:", stdout);
-  });
-}
-
-// Disable automatic time synchronization
-function disableAutoTimeSync(callback) {
-  const osType = process.platform;
-  let command;
-
-  if (osType === "win32") {
-    command =
-      'w32tm /config /manualpeerlist:"",0x8 /syncfromflags:MANUAL /reliable:NO /update && net stop w32time';
-  } else {
-    command = "timedatectl set-ntp false";
-  }
-
-  sudo.exec(command, options, (error, stdout, stderr) => {
-    if (error) {
-      console.error("Failed to disable auto time:", stderr);
-      return;
-    }
-    console.log("Auto time disabled:", stdout);
-    if (callback) callback();
-  });
-}
-
-// Enable automatic time synchronization
-function enableAutoTimeSync(callback) {
-  const osType = process.platform;
-  let command;
-
-  if (osType === "win32") {
-    command = "net start w32time";
-  } else {
-    command = "timedatectl set-ntp true";
-  }
-
-  sudo.exec(command, options, (error, stdout, stderr) => {
-    if (error) {
-      console.error("Failed to enable auto time:", stderr);
-      return;
-    }
-    console.log("Auto time enabled:", stdout);
-    if (callback) callback();
   });
 }
