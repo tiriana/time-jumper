@@ -8,7 +8,7 @@ function Show-Help {
     Write-Host "Usage: script.ps1 [-help] [-sync] <minutes>"
     Write-Host "Options:"
     Write-Host "  -help           Show this help message"
-    Write-Host "  -sync           Disable and re-enable time synchronization"
+    Write-Host "  -sync           Disable and re-enable auto time synchronization"
     Write-Host "  <minutes>       Number of minutes to change the system time"
     exit 0
 }

@@ -2,7 +2,7 @@
 
 usage() {
     echo "Usage: $0 [-s|--sync] <minutes>"
-    echo "  -s, --sync    Disable and re-enable time synchronization"
+    echo "  -s, --sync    Disable and re-enable auto time synchronization"
     echo "  <minutes>     Number of minutes to jump"
     exit 0  # Exit with 0 for help command
 }

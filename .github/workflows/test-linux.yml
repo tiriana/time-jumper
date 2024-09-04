@@ -1,0 +1,28 @@
+name: Test Linux
+
+on:
+  push:
+    paths:
+      - "unix.sh"
+  pull_request:
+    paths:
+      - "unix.sh"
+
+jobs:
+  test-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Make script executable
+        run: chmod +x ./unix.sh
+
+      - name: Run help command
+        run: ./unix.sh --help
+
+      - name: Run script to change time (requires sudo)
+        run: sudo ./unix.sh 60
+
+      - name: Run script to change time with sync off (requires sudo)
+        run: sudo ./unix.sh 60 -s

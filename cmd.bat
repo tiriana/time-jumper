@@ -54,7 +54,7 @@ rem Wait 1 second and set back original time
 timeout /t 1 >nul
 time %time%
 
-rem Re-enable time sync if requested
+rem Re-enable time sync if needed
 if "%SYNC%"=="true" (
     net start w32time
     w32tm /resync

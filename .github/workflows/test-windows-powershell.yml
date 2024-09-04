@@ -1,0 +1,30 @@
+name: Test Windows PowerShell
+
+on:
+  push:
+    paths:
+      - "power-shell.ps1"
+  pull_request:
+    paths:
+      - "power-shell.ps1"
+
+jobs:
+  test-windows-powershell:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Test --help for PowerShell
+        run: powershell.exe -File ./power-shell.ps1 --help
+        continue-on-error: false
+
+      - name: Test time change for PowerShell
+        run: |
+          powershell.exe -File ./power-shell.ps1 60
+        continue-on-error: false
+
+      - name: Test time change with sync off for PowerShell
+        run: |
+          powershell.exe -File ./power-shell.ps1 60 -s
+        continue-on-error: false

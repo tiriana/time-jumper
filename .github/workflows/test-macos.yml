@@ -1,0 +1,28 @@
+name: Test macOS
+
+on:
+  push:
+    paths:
+      - "mac.sh"
+  pull_request:
+    paths:
+      - "mac.sh"
+
+jobs:
+  test-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Make script executable
+        run: chmod +x ./mac.sh
+
+      - name: Run help command
+        run: ./mac.sh --help
+
+      - name: Run script to change time (requires sudo)
+        run: sudo ./mac.sh 60
+
+      - name: Run script to change time with sync off (requires sudo)
+        run: sudo ./mac.sh 60 -s
