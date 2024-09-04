@@ -4,6 +4,7 @@ setlocal
 set SYNC=false
 set MINUTES=
 
+rem Parse arguments
 :parse_args
 if "%1"=="--help" goto :usage
 if "%1"=="-s" set SYNC=true && shift && goto :parse_args
@@ -16,7 +17,7 @@ echo Usage: %0 [-s] <minutes>
 echo    --help: Show help
 echo    -s    : Disable and re-enable time synchronization
 echo    <minutes>: Number of minutes to change the system time
-exit /b 1
+exit /b 0
 
 :done_parse
 if not defined MINUTES goto :usage
@@ -61,3 +62,4 @@ if "%SYNC%"=="true" (
 )
 
 endlocal
+exit /b 0
