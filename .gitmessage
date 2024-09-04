@@ -1,0 +1,26 @@
+# <type>: <subject>
+
+# <body>
+
+# <footer>
+
+# Type can be
+#   feat     (new feature)
+#   fix      (bug fix)
+#   docs     (changes to documentation)
+#   style    (formatting, missing semi colons, etc; no code change)
+#   refactor (refactoring production code)
+#   test     (adding missing tests, refactoring tests; no production code change)
+#   chore    (updating grunt tasks etc; no production code change)
+
+# Subject should use imperative tone and say what you did.
+# The body should go into detail about changes made.
+# The footer should contain any JIRA (or other tool) issue references or actions.
+
+# Example:
+# feat: Add new time-jumping feature
+#
+# This feature allows users to jump to any point in time.
+# It includes safeguards to prevent paradoxes.
+#
+# Closes #123
