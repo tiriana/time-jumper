@@ -6,7 +6,7 @@
     "url": "https://tiriana.github.io/phantombit.io/"
   },
   "main": "time-jumper.js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A time-jumping tool",
   "dependencies": {
     "commander": "^12.1.0"
@@ -30,6 +30,5 @@
     "husky": "^7.0.4",
     "standard-version": "^9.5.0"
   },
-  "license": "MIT",
-
+  "license": "MIT"
 }
