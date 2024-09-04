@@ -34,11 +34,11 @@ $SYNC && toggle_time_sync off
 NEW_TIME=$(date -v +"$MINUTES"M +"%Y-%m-%d %H:%M:%S")
 echo "Changing system time by $MINUTES minutes to: $NEW_TIME"
 
-sudo date $(date -v +"$MINUTES"M +"%m%d%H%M%Y")
+sudo date $(date -v +"$MINUTES"M +"%m%d%H%M%Y") || true
 
 sleep 1
 
 echo "Reverting system time to original: $CURRENT_TIME"
-sudo date $(date -j -f "%Y-%m-%d %H:%M:%S" "$CURRENT_TIME" +"%m%d%H%M%Y")
+sudo date $(date -j -f "%Y-%m-%d %H:%M:%S" "$CURRENT_TIME" +"%m%d%H%M%Y") || true
 
 $SYNC && toggle_time_sync on
