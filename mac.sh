@@ -4,7 +4,7 @@ usage() {
     echo "Usage: $0 [-s|--sync] <minutes>"
     echo "  -s, --sync    Disable and re-enable auto time sync"
     echo "  <minutes>     Number of minutes to jump"
-    exit 1
+    exit 0
 }
 
 SYNC=false
@@ -26,20 +26,18 @@ toggle_time_sync() {
     sudo systemsetup -setusingnetworktime $1
 }
 
-# Get current time and format
 CURRENT_TIME=$(date +"%Y-%m-%d %H:%M:%S")
-DATE_FORMAT=$(date +"%x %X")  # This will get system date/time format
-echo "Current time format: $DATE_FORMAT"
+echo "Current system time: $CURRENT_TIME"
 
 $SYNC && toggle_time_sync off
 
-# Calculate new time by adding minutes
-NEW_TIME=$(date -v +"$MINUTES"M +"$DATE_FORMAT")
+NEW_TIME=$(date -v +"$MINUTES"M +"%Y-%m-%d %H:%M:%S")
 echo "Changing system time by $MINUTES minutes to: $NEW_TIME"
-
-# Apply the new time
-sudo date -f "$DATE_FORMAT" "$NEW_TIME"
+sudo date "$NEW_TIME"
 
 sleep 1
 
-# Revert to the original time using system's format
+echo "Reverting system time to original: $CURRENT_TIME"
+sudo date "$CURRENT_TIME"
+
+$SYNC && toggle_time_sync on

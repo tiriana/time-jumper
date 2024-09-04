@@ -27,23 +27,19 @@ function Toggle-TimeSync {
     }
 }
 
-# Check for help flag
 if ($help.IsPresent) {
     Show-Help
 }
 
-# Ensure minutes are defined
 if (-not $minutes) {
     Write-Host "Error: Please provide the number of minutes to change the time."
     Show-Help
 }
 
-# Disable time sync if requested
 if ($sync.IsPresent) {
     Toggle-TimeSync -action "off"
 }
 
-# Get current time and calculate the new time
 $CurrentTime = Get-Date
 $NewTime = $CurrentTime.AddMinutes($minutes)
 
@@ -51,14 +47,11 @@ Write-Host "Current time: $CurrentTime"
 Write-Host "Changing time by $minutes minutes..."
 Set-Date -Date $NewTime
 
-# Wait for 1 second
 Start-Sleep -Seconds 1
 
-# Revert time back to original
 Write-Host "Reverting time to the original..."
 Set-Date -Date $CurrentTime
 
-# Re-enable time sync if requested
 if ($sync.IsPresent) {
     Toggle-TimeSync -action "on"
 }
