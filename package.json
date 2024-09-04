@@ -9,7 +9,8 @@
   "version": "1.0.1",
   "description": "A time-jumping tool",
   "dependencies": {
-    "commander": "^12.1.0"
+    "commander": "^12.1.0",
+    "moment-timezone": "^0.5.45"
   },
   "repository": {
     "type": "git",

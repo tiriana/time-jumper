@@ -4,11 +4,26 @@ const { exec } = require("child_process");
 const { program } = require("commander");
 const fs = require("fs");
 const path = require("path");
+const moment = require("moment-timezone");
 
 const packageJson = JSON.parse(
   fs.readFileSync(path.join(__dirname, "package.json"), "utf8")
 );
 const { version, author, license, description } = packageJson;
+
+function execCommand(command, successMessage, errorMessage) {
+  return new Promise((resolve, reject) => {
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`${errorMessage}: ${stderr}`);
+        reject(error);
+      } else {
+        console.log(successMessage);
+        resolve(stdout);
+      }
+    });
+  });
+}
 
 program
   .name("time-jumper")
@@ -32,7 +47,7 @@ program
       "sudo timedatectl set-ntp false",
       "Automatic time synchronization disabled.",
       "Error disabling sync"
-    );
+    ).catch(() => process.exit(1));
   });
 
 program
@@ -43,7 +58,7 @@ program
       "sudo timedatectl set-ntp true",
       "Automatic time synchronization enabled.",
       "Error enabling sync"
-    );
+    ).catch(() => process.exit(1));
   });
 
 program
@@ -51,27 +66,41 @@ program
   .description("Jump the system time by a specified period, wait, then revert")
   .requiredOption("--hours <hours>", "Period to jump in hours")
   .option("--duration <duration>", "Duration to wait in seconds", "1")
-  .action(({ hours, duration }) => {
-    const hoursToMillis = parseInt(hours, 10) * 3600 * 1000;
-    const durationInMillis = parseInt(duration, 10) * 1000;
+  .action(async ({ hours, duration }) => {
+    const hoursToJump = parseInt(hours, 10);
+    const durationInSeconds = parseInt(duration, 10);
 
-    const now = new Date();
-    const originalTime = now.toISOString().slice(0, 19).replace("T", " ");
-    const newTime = new Date(now.getTime() + hoursToMillis);
-    const newTimeStr = newTime.toISOString().slice(0, 19).replace("T", " ");
+    const timezone = moment.tz.guess();
+    console.log(`Detected timezone: ${timezone}`);
 
-    const commands = `
-      sudo timedatectl set-ntp false &&
-      sudo date -s "${newTimeStr}" &&
-      sleep ${durationInMillis / 1000} &&
-      sudo date -s "${originalTime}" &&
-      sudo timedatectl set-ntp true`;
+    const now = moment().tz(timezone);
+    console.log(`Current time: ${now.format("YYYY-MM-DD HH:mm:ss")}`);
 
-    execCommand(
-      commands,
-      "Time jump and revert successful.",
-      "Error jumping time"
-    );
+    const newTime = now.clone().add(hoursToJump, "hours");
+    console.log(`Jumping to: ${newTime.format("YYYY-MM-DD HH:mm:ss")}`);
+
+    try {
+      await execCommand(
+        `sudo date -s "${newTime.format("YYYY-MM-DD HH:mm:ss")}"`,
+        `Time set to ${newTime.format("YYYY-MM-DD HH:mm:ss")}`,
+        "Error setting new time"
+      );
+
+      await new Promise((resolve) =>
+        setTimeout(resolve, durationInSeconds * 1000)
+      );
+
+      await execCommand(
+        `sudo date -s "${now.format("YYYY-MM-DD HH:mm:ss")}"`,
+        `Time reverted to ${now.format("YYYY-MM-DD HH:mm:ss")}`,
+        "Error reverting time"
+      );
+
+      console.log("Time jump and revert successful.");
+    } catch (error) {
+      console.error("Error during time jump process");
+      process.exit(1);
+    }
   });
 
 program.parse(process.argv);
