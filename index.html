@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Time Jumper</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin-top: 50px;
+      }
+      button {
+        margin: 10px;
+        padding: 10px;
+        font-size: 16px;
+      }
+      .status {
+        margin-top: 20px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Time Jumper</h1>
+    <button id="disableAutoTime">Disable Auto Time</button>
+    <button id="enableAutoTime">Enable Auto Time</button>
+    <div class="status">
+      Auto Time Status: <span id="autoTimeStatus">Enabled</span>
+    </div>
+
+    <br />
+    <button id="jump1h">Jump 1h</button>
+    <button id="jump5h">Jump 5h</button>
+    <button id="jump12h">Jump 12h</button>
+    <button id="jump24h">Jump 24h</button>
+
+    <script src="renderer.js"></script>
+  </body>
+</html>

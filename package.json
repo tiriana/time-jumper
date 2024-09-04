@@ -1,0 +1,18 @@
+{
+  "name": "time-jumper",
+  "author": {
+    "email": "radomir.wojtera@gmail.com",
+    "name": "Radomir Wojtera",
+    "url": "https://tiriana.github.io/phantombit.io/"
+  },
+  "version": "1.0.0",
+  "description": "A time-jumping tool",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^12.0.0",
+    "sudo-prompt": "^9.2.1"
+  }
+}
