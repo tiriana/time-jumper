@@ -40,7 +40,7 @@ if [ "$SYNC" = true ]; then
 fi
 
 # Calculate new time and set it
-NEW_TIME=$(date -v+"$MINUTES"M +"%Y-%m-%d %H:%M:%S")
+NEW_TIME=$(date -v +"$MINUTES"M +"%m%d%H%M%Y.%S")
 echo "Changing system time by $MINUTES minutes to: $NEW_TIME"
 sudo date "$NEW_TIME" || { echo "Error: Failed to set system time."; exit 1; }
 
